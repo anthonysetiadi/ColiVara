@@ -245,6 +245,11 @@ GOTENBERG_URL = env("GOTENBERG_URL", default="http://gotenberg:3000")
 # cors
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Media files (user-uploaded files)
+# https://docs.djangoproject.com/en/5.0/topics/files/
+MEDIA_ROOT = env("MEDIA_ROOT", default=BASE_DIR / "Media")
+MEDIA_URL = env("MEDIA_URL", default="/media/")
+
 # logging
 LOGGING = {
     "version": 1,
@@ -302,18 +307,30 @@ if SENTRY_DSN:
 # PROXY
 PROXY_URL = env("PROXY_URL", default=None)
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "bucket_name": AWS_STORAGE_BUCKET_NAME,
-            "region_name": "us-east-1",  # e.g., 'us-west-1'
-            "default_acl": None,  # Makes files private by default
-            "querystring_auth": True,  # Requires signed URLs for access
-            "querystring_expire": 3600,  # Expiry time for signed URLs (1 hour)
+USE_S3_STORAGE = env.bool("USE_S3_STORAGE", default=False)
+
+if USE_S3_STORAGE:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                "region_name": "us-east-1",  # e.g., 'us-west-1'
+                "default_acl": None,  # Makes files private by default
+                "querystring_auth": True,  # Requires signed URLs for access
+                "querystring_expire": 3600,  # Expiry time for signed URLs (1 hour)
+            },
         },
-    },
-    "staticfiles": {
-        "BACKEND": "servestatic.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+        "staticfiles": {
+            "BACKEND": "servestatic.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "servestatic.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
