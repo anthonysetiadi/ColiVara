@@ -564,7 +564,7 @@ class Document(models.Model):
         # here all documents are converted to pdf
         # Step 3: Turn the PDF into images via pdf2image
         try:
-            images = convert_from_bytes(pdf_data)
+            images = convert_from_bytes(pdf_data, dpi=100)
         except Exception:
             raise ValidationError(
                 "Failed to convert PDF to images. The PDF may be corrupted, which sometimes happens with URLs. Try downloading the document and sending us the base64."
